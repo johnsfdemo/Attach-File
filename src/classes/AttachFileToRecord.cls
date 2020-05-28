@@ -15,26 +15,18 @@ global without sharing class AttachFileToRecord {
     private static final String FAILURE = 'FAILURE';
     
     global class Requests {
-        @InvocableVariable
-        global Id recordId;                 // The ID of the record
-        
-        @InvocableVariable
-        global String fileTitle;            // The title of the file to assign
+        @InvocableVariable(label='Record ID' required=true)   global Id recordId;                 // The ID of the record
+        @InvocableVariable(label='File Title' required=true)  global String fileTitle;            // The title of the file to assign
     }
     
     global class Results {
-        @InvocableVariable
-        global String status;               // Either 'SUCCESS' or 'FAILURE'
-        
-        @InvocableVariable
-        global String message;              // In the case of FAILURE, a more detailed message
+        @InvocableVariable(label='Status')                  global String status;               // Either 'SUCCESS' or 'FAILURE'       
+        @InvocableVariable(label='Error message')           global String message;              // In the case of FAILURE, a more detailed message
     }    
     
-    @InvocableMethod(label='Attach File to Record' description='Attaches a file to a record.')
-    
+    @InvocableMethod(label='Attach File to Record' description='Attaches a file to a record.')    
     public static List<Results> attachFileToRecord (List<Requests> records) {
         
-        List<Results> resultList = new List<Results>();
         Results result = new Results();
         
         if (records.size() != 1) {
@@ -49,13 +41,12 @@ global without sharing class AttachFileToRecord {
                 System.debug(result.message);
             } else 
                 try {
-                    ContentDocumentLink link = new ContentDocumentLink(
+                    insert new ContentDocumentLink(
                         ContentDocumentId = docs[0].Id,
                         LinkedEntityId = records[0].recordId,
                         ShareType = 'I',
                         Visibility = 'AllUsers'
                     );
-                    insert link;
                     result.status = SUCCESS;
                 } catch (DMLException e) {
                     result.status = FAILURE;
@@ -64,8 +55,7 @@ global without sharing class AttachFileToRecord {
                 }
         }
         
-        resultList.add(result);
-        return resultList;
+        return new List<Results> { result };
     }
     
 }
